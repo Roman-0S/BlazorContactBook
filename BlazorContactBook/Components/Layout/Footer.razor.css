@@ -1,0 +1,16 @@
+﻿.footer {
+    background-color: var(--rs-theme-900);
+}
+
+    .footer a {
+        color: var(--rs-theme-200);
+    }
+
+        .footer a:hover {
+            color: var(--rs-theme-core);
+        }
+
+    .footer .bi {
+        font-size: 1.5rem;
+        padding-inline-start: 0.5rem;
+    }
