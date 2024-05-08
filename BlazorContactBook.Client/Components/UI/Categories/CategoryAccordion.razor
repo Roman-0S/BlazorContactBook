@@ -2,7 +2,7 @@
 
     @foreach (CategoryDTO category in Categories)
     {
-        <CategoryAccordionItem @key="category.Id" AccordionId="@accordionId" Category="category" />
+        <CategoryAccordionItem @key="category.Id" AccordionId="@accordionId" Category="category" OnCategoryDelete="OnCategoryDelete" OnCategoryUpdate="OnCategoryUpdate" />
     }
 
 </div>
@@ -17,6 +17,12 @@
     [Parameter, EditorRequired]
     public IEnumerable<CategoryDTO> Categories { get; set; } = [];
 
+    [Parameter, EditorRequired]
+    public EventCallback<int> OnCategoryDelete { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<CategoryDTO> OnCategoryUpdate { get; set; }
+
     #endregion
 
 
@@ -24,13 +30,12 @@
 
     private string accordionId = Guid.NewGuid().ToString();
 
-
     #endregion
 
 
     #region methods
 
-
+        
 
     #endregion
 }
