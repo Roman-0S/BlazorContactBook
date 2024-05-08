@@ -1,4 +1,5 @@
 ﻿@page "/categories"
+@using BlazorContactBook.Client.Components.UI.Categories
 @using BlazorContactBook.Client.Helpers
 
 @rendermode InteractiveServer
@@ -43,14 +44,7 @@
 
     </EditForm>
 
-    <ul>
-
-        @foreach (CategoryDTO category in categories)
-        {
-            <li>@category.Name</li>
-        }
-
-    </ul>
+    <CategoryAccordion Categories="categories" />
 
 </div>
 
@@ -97,6 +91,36 @@
             throw;
         }
 
+    }
+
+    private async Task DeleteCategory(int categoryId)
+    {
+        try
+        {
+            await CategoryService.DeleteCategoryAsync(categoryId, userInfo!.UserId);
+
+            categories = await CategoryService.GetCategoriesAsync(userInfo!.UserId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
+    }
+
+    public async Task UpdateCategory(CategoryDTO category)
+    {
+        try
+        {
+            await CategoryService.UpdateCategoryAsync(category, userInfo!.UserId);
+
+            categories = await CategoryService.GetCategoriesAsync(userInfo!.UserId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            throw;
+        }
     }
 
     #endregion
