@@ -47,12 +47,12 @@ namespace BlazorContactBook.Client.Models
         public string? City { get; set; }
 
         [Required]
-        public State State { get; set; }
+        public State? State { get; set; }
 
         [Required]
         [Display(Name = "Zip Code")]
         [DataType(DataType.PostalCode)]
-        public int ZipCode { get; set; }
+        public int? ZipCode { get; set; }
 
         [Required]
         [EmailAddress]
