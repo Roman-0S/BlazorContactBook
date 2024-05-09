@@ -1,5 +1,6 @@
 ﻿using BlazorContactBook.Client.Models;
 using BlazorContactBook.Client.Services.Interfaces;
+using BlazorContactBook.Helpers;
 using BlazorContactBook.Models;
 using BlazorContactBook.Services.Interfaces;
 
@@ -25,20 +26,34 @@ namespace BlazorContactBook.Services
                 AppUserId = userId,
             };
 
+            if (contactDTO.ImageURL.StartsWith("data:"))
+            {
+                newContact.Image = UploadHelper.GetImageUpload(contactDTO.ImageURL);
+            }
 
             Contact createdContact = await repository.CreateContactAsync(newContact);
 
-
             IEnumerable<int> categoryIds = contactDTO.Categories.Select(c => c.Id);
-
             await repository.AddCategoriesToContactAsync(createdContact.Id, userId, categoryIds);
-
-            // need image
-
-
 
             return createdContact.ToDTO();
 
+        }
+
+        public async Task<IEnumerable<ContactDTO>> GetContactsAsync(string userId)
+        {
+            IEnumerable<Contact> contacts = await repository.GetContactsAsync(userId);
+
+            List<ContactDTO> contactsDTO = new List<ContactDTO>();
+
+            foreach (Contact contact in contacts)
+            {
+                ContactDTO contactDTO = contact.ToDTO();
+
+                contactsDTO.Add(contactDTO);
+            }
+
+            return contactsDTO;
         }
     }
 }

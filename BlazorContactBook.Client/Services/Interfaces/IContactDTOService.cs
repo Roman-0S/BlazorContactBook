@@ -6,5 +6,7 @@ namespace BlazorContactBook.Client.Services.Interfaces
     {
         Task<ContactDTO> CreateContactAsync(ContactDTO contact, string userId);
 
+        Task<IEnumerable<ContactDTO>> GetContactsAsync(string userId);
+
     }
 }

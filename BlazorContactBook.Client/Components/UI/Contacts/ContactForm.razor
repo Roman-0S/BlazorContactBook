@@ -22,9 +22,9 @@
 
                 <div>
 
-                    <InputFile class="form-control mt-2" accept=".png, .jpg, .jpeg, .svg" />
+                    <InputFile OnChange="OnFileChange" class="form-control mt-2" accept=".png, .jpg, .jpeg, .svg" />
 
-                    <span class="text-danger">@* display error message *@</span>
+                    <span class="text-danger">@imageError</span>
 
                 </div>
 
@@ -229,6 +229,8 @@
 
     private IEnumerable<CategoryDTO> categories = [];
 
+    private string? imageError;
+
     #endregion
 
 
@@ -264,6 +266,30 @@
         }
 
         await OnSubmit.InvokeAsync(Contact);
+    }
+
+    private async Task OnFileChange(InputFileChangeEventArgs changeEvent)
+    {
+        if (changeEvent.File is null)
+        {
+            Contact!.ImageURL = ImageHelper.DefaultContactImage;
+        }
+        else if (changeEvent.File.Size > ImageHelper.MaxFileSize)
+        {
+            imageError = "Images must be less than 5 MB";
+        }
+        else
+        {
+            try
+            {
+                Contact!.ImageURL = await ImageHelper.GetDataUrl(changeEvent.File);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                imageError = "Could not read the selected file. Please select a different image";
+            }
+        }
     }
 
     #endregion
