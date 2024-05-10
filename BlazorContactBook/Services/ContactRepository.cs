@@ -29,6 +29,19 @@ namespace BlazorContactBook.Services
             }
         }
 
+        public async Task RemoveCategoriesFromContactAsync(int contactId, string userId)
+        {
+            using ApplicationDbContext context = contextFactory.CreateDbContext();
+
+            Contact? contact = await context.Contacts.Include(c => c.Categories).FirstOrDefaultAsync(c => c.Id == contactId && c.AppUserId == userId);
+
+            if (contact is not null)
+            {
+                contact.Categories.Clear();
+                await context.SaveChangesAsync();
+            }
+        }
+
         public async Task<Contact> CreateContactAsync(Contact contact)
         {
             using ApplicationDbContext context = contextFactory.CreateDbContext();
@@ -43,7 +56,7 @@ namespace BlazorContactBook.Services
         {
             using ApplicationDbContext context = contextFactory.CreateDbContext();
 
-            Contact? contact = await context.Contacts.FirstOrDefaultAsync(c => c.Id == contactId && c.AppUserId == userId);
+            Contact? contact = await context.Contacts.Include(c => c.Categories).FirstOrDefaultAsync(c => c.Id == contactId && c.AppUserId == userId);
 
             return contact;
         }
@@ -52,7 +65,7 @@ namespace BlazorContactBook.Services
         {
             using ApplicationDbContext context = contextFactory.CreateDbContext();
 
-            IEnumerable<Contact> contacts = await context.Contacts.Where(c => c.AppUserId == userId).ToListAsync();
+            IEnumerable<Contact> contacts = await context.Contacts.Where(c => c.AppUserId == userId).Include(c => c.Categories).ToListAsync();
 
             return contacts;
         }
@@ -84,6 +97,13 @@ namespace BlazorContactBook.Services
                     await context.SaveChangesAsync();
                 }
             }
+        }
+
+        public async Task DeleteContactAsync(int contactId, string userId)
+        {
+            using ApplicationDbContext context = contextFactory.CreateDbContext();
+
+            Contact? contact = context.Contacts.FirstOrDefault(c => c.Id == contactId && c.AppUserId == userId);
         }
     }
 }

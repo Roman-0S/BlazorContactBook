@@ -12,5 +12,6 @@ namespace BlazorContactBook.Client.Services.Interfaces
 
         Task<ContactDTO?> GetContactByIdAsync(int contactId, string userId);
 
+        Task DeleteContactAsync(int contactId, string userId);
     }
 }

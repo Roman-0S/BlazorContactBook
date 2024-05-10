@@ -90,9 +90,21 @@ namespace BlazorContactBook.Services
                 }
 
 
-                // Add Categories
+                // don't let the database update categories yet
+
+                contact.Categories.Clear();
 
                 await repository.UpdateContactAsync(contact);
+
+                // remove old categories
+
+                await repository.RemoveCategoriesFromContactAsync(contact.Id, userId);
+
+                // add user selected categories
+
+                IEnumerable<int> selectedCategoryIds = contactDTO.Categories.Select(c => c.Id);
+
+                await repository.AddCategoriesToContactAsync(contact.Id, userId, selectedCategoryIds);
             }
         }
     }

@@ -243,6 +243,9 @@
             userInfo = await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
 
             categories = await CategoryService.GetCategoriesAsync(userInfo!.UserId);
+
+            // Between any collection types, doing [.. ] will look at what the collection type is going to be and convert it for you.
+            selectedCategoryIds = [.. Contact!.Categories.Select(c => c.Id)];
         }
         catch (Exception ex)
         {
@@ -253,6 +256,8 @@
 
     private async Task HandleSubmit()
     {
+        Contact!.Categories.Clear();
+
         foreach (int categoryId in selectedCategoryIds)
         {
 
