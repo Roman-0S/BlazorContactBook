@@ -3,6 +3,8 @@ using BlazorContactBook.Client.Services.Interfaces;
 using BlazorContactBook.Helpers;
 using BlazorContactBook.Models;
 using BlazorContactBook.Services.Interfaces;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
 
 namespace BlazorContactBook.Services
 {
@@ -40,6 +42,15 @@ namespace BlazorContactBook.Services
 
         }
 
+        public async Task<ContactDTO?> GetContactByIdAsync(int contactId, string userId)
+        {
+            Contact? contact = await repository.GetContactByIdAsync(contactId, userId);
+
+            ContactDTO? contactDTO = contact!.ToDTO();
+
+            return contactDTO;
+        }
+
         public async Task<IEnumerable<ContactDTO>> GetContactsAsync(string userId)
         {
             IEnumerable<Contact> contacts = await repository.GetContactsAsync(userId);
@@ -54,6 +65,35 @@ namespace BlazorContactBook.Services
             }
 
             return contactsDTO;
+        }
+
+        public async Task UpdateContactAsync(ContactDTO contactDTO, string userId)
+        {
+            Contact? contact = await repository.GetContactByIdAsync(contactDTO.Id, userId);
+
+            if (contact is not null)
+            {
+                contact.FirstName = contactDTO.FirstName;
+                contact.LastName = contactDTO.LastName;
+                contact.BirthDate = contactDTO.BirthDate;
+                contact.Address1 = contactDTO.Address1;
+                contact.Address2 = contactDTO.Address2;
+                contact.City = contactDTO.City;
+                contact.State = contactDTO.State ?? contact.State;
+                contact.ZipCode = contactDTO.ZipCode ?? contact.ZipCode;
+                contact.Email = contactDTO.Email;
+                contact.PhoneNumber = contactDTO.PhoneNumber;
+
+                if (contactDTO.ImageURL.StartsWith("data:"))
+                {
+                    contact.Image = UploadHelper.GetImageUpload(contactDTO.ImageURL);
+                }
+
+
+                // Add Categories
+
+                await repository.UpdateContactAsync(contact);
+            }
         }
     }
 }
