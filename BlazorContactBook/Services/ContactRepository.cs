@@ -103,7 +103,13 @@ namespace BlazorContactBook.Services
         {
             using ApplicationDbContext context = contextFactory.CreateDbContext();
 
-            Contact? contact = context.Contacts.FirstOrDefault(c => c.Id == contactId && c.AppUserId == userId);
+            Contact? contact = await context.Contacts.FirstOrDefaultAsync(c => c.Id == contactId && c.AppUserId == userId);
+
+            if (contact is not null)
+            {
+                context.Contacts.Remove(contact);
+                await context.SaveChangesAsync();
+            }
         }
     }
 }

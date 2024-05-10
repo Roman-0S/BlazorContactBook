@@ -119,7 +119,9 @@
     {
         try
         {
+            await ContactService.DeleteContactAsync(contactId, userInfo!.UserId);
 
+            contacts = await ContactService.GetContactsAsync(userInfo!.UserId);
         }
         catch (Exception ex)
         {
