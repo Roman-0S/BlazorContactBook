@@ -53,7 +53,8 @@
                 </div>
 
             }
-            else if (status == Status.Deleting) {
+            else if (status == Status.Deleting)
+            {
 
                 <div class="d-md-flex gap-3 p-3">
 
@@ -82,7 +83,7 @@
                         <span class="text-nowrap p-1">
 
                             <button class="btn btn-sm btn-danger" @onclick="DeleteCategory">
-                                
+
                                 <i class="bi bi-trash"></i>
 
                                 Delete
@@ -165,13 +166,25 @@
 
                 <ul class="list-group">
 
-                    @* display the contacts here *@
+                    @if (Category.Contacts.Count is 0)
+                    {
+                        <li class="list-group-item text-center lead text-secondary">
 
-                    <li class="list-group-item text-center lead text-secondary">
+                            No contacts in this category
 
-                        No contacts in this category
+                        </li>
+                    }
+                    else
+                    {
+                        foreach (ContactDTO contact in Category.Contacts)
+                        {
+                            <li class="list-group-item">
 
-                    </li>
+                                <a href="contacts/edit/@contact.Id" class="text-decoration-none"><img src="@contact.ImageURL" class="circle-img" /> @contact.FullName</a>
+
+                            </li>
+                        }
+                    }
 
                 </ul>
 
