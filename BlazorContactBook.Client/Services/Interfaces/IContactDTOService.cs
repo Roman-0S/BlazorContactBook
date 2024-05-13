@@ -8,6 +8,10 @@ namespace BlazorContactBook.Client.Services.Interfaces
 
         Task<IEnumerable<ContactDTO>> GetContactsAsync(string userId);
 
+        Task<IEnumerable<ContactDTO>> GetContactsByCategoryIdAsync(int categoryId, string userId);
+
+        Task<IEnumerable<ContactDTO>> SearchContactsAsync(string searchTerm, string userId);
+
         Task UpdateContactAsync(ContactDTO contact, string userId);
 
         Task<ContactDTO?> GetContactByIdAsync(int contactId, string userId);

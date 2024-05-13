@@ -111,5 +111,39 @@ namespace BlazorContactBook.Services
                 await context.SaveChangesAsync();
             }
         }
+
+        public async Task<IEnumerable<Contact>> GetContactsByCategoryIdAsync(int categoryId, string userId)
+        {
+            using ApplicationDbContext context = contextFactory.CreateDbContext();
+
+            List<Contact> contacts = await context.Contacts.Include(c => c.Categories).Where(c => c.AppUserId == userId && c.Categories.Any(category => category.Id == categoryId)).ToListAsync();
+
+            #region Category approach
+            // Querying the database for categories and checking them against contacts
+
+            // Category? category = await context.Categories.Include(c => c.Contacts).ThenInclude(contact => contact.Categories).FirstOrDefaultAsync(c => c.Id == categoryId && c.AppUserId == userId);
+
+            // if (category != null) contacts = category.Contacts.ToList();
+            #endregion
+
+            return contacts;
+        }
+
+        public async Task<IEnumerable<Contact>> SearchContactsAsync(string searchTerm, string userId)
+        {
+            using ApplicationDbContext context = contextFactory.CreateDbContext();
+
+            string normalizedSearch = searchTerm.Trim().ToLower();
+
+            IEnumerable<Contact> contacts = await context.Contacts.Where(c => c.AppUserId == userId)
+                                                           .Include(c => c.Categories)
+                                                           .Where(c => string.IsNullOrEmpty(normalizedSearch)
+                                                                    || c.FirstName!.ToLower().Contains(normalizedSearch)
+                                                                    || c.LastName!.ToLower().Contains(normalizedSearch)
+                                                                    || c.Categories.Any(categories => categories.Name!.ToLower().Contains(normalizedSearch)))
+                                                           .ToListAsync();
+
+            return contacts;
+        }
     }
 }

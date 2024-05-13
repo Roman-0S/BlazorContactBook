@@ -17,5 +17,11 @@ a.badge {
 }
 
     a.badge:hover {
-        background-color: var(--cf-theme-100)
+        background-color: var(--rs-theme-100)
     }
+
+.card {
+    background: #ffffff;
+    background: -webkit-linear-gradient(to left, #beefe0, #ffffff 30%);
+    background: linear-gradient(to left, #beefe0, #ffffff 30%);
+}

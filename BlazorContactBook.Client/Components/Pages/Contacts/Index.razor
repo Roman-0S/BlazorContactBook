@@ -7,12 +7,25 @@
 @rendermode InteractiveServer
 
 @inject IContactDTOService ContactService
+@inject ICategoryDTOService CategoryService
+@inject NavigationManager Nav
 
 <PageTitle>ContactBook | Contacts</PageTitle>
 
 <div class="d-flex align-items-center mt-3">
 
-    <h1>All Contacts</h1>
+    @if(!string.IsNullOrWhiteSpace(SearchTerm))
+    {
+        <h1>Search results for "@SearchTerm"</h1>   
+    }
+    else if (CategoryId is null)
+    {
+        <h1>@(categories.FirstOrDefault(c => c.Id == CategoryId)?.Name ?? "Unknown")</h1>
+    }
+    else
+    {
+        <h1>All Contacts</h1>
+    }
 
     <a href="contacts/create" class="ms-auto btn btn-primary rounded-pill">New Contact</a>
 
@@ -25,11 +38,11 @@
 
         <div class="sideNav mb-3">
 
-            <form>
+            <form @onsubmit="HandleSearch">
 
                 <div class="input-group">
 
-                    <input type="text" class="form-control" placeholder="Search" />
+                    <InputText type="text" class="form-control" placeholder="Search" @bind-Value="searchInput"/>
 
                     <button class="btn btn-primary">Search</button>
 
@@ -41,11 +54,16 @@
 
                 <label class="form-label">Category Filter</label>
 
-                <select class="form-select">
+                <InputSelect class="form-select" @bind-Value="CategoryId" @bind-Value:after="HandleCategoryChange">
 
                     <option value="">All Contacts</option>
 
-                </select>
+                    @foreach (CategoryDTO category in categories)
+                    {
+                        <option value="@category.Id">@category.Name</option>
+                    }
+
+                </InputSelect>
 
             </div>
 
@@ -93,6 +111,11 @@
     [CascadingParameter]
     public Task<AuthenticationState>? AuthStateTask { get; set; }
 
+    [SupplyParameterFromQuery] // ?categoryId=
+    public int? CategoryId { get; set; }
+
+    [SupplyParameterFromQuery] // ?searchTerm=
+    public string? SearchTerm { get; set; }
 
     #endregion
 
@@ -103,6 +126,10 @@
 
     private UserInfo? userInfo;
 
+    private IEnumerable<CategoryDTO> categories = [];
+
+    private string? searchInput;
+
     #endregion
 
 
@@ -112,7 +139,41 @@
     {
         userInfo = await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
 
-        contacts = await ContactService.GetContactsAsync(userInfo!.UserId);
+        categories = await CategoryService.GetCategoriesAsync(userInfo!.UserId);
+
+        if (CategoryId is not null or 0)
+        {
+            // int? and int are different, even though it is checked for null, c# won't recognize int? as an int -> use .Value to get the real integer
+            contacts = await ContactService.GetContactsByCategoryIdAsync(CategoryId.Value, userInfo!.UserId);
+        }
+        else
+        {
+
+            contacts = await ContactService.GetContactsAsync(userInfo!.UserId);
+
+        }
+
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(SearchTerm))
+        {
+            searchInput = SearchTerm;
+            CategoryId = null;
+
+            contacts = await ContactService.SearchContactsAsync(SearchTerm, userInfo!.UserId);
+        }
+        else if (CategoryId is not null or 0)
+        {
+            searchInput = null;
+
+            contacts = await ContactService.GetContactsByCategoryIdAsync(CategoryId.Value, userInfo!.UserId);
+        }
+        else
+        {
+            contacts = await ContactService.GetContactsAsync(userInfo!.UserId);
+        }
     }
 
     private async Task DeleteContact(int contactId)
@@ -128,6 +189,32 @@
             Console.WriteLine(ex);
             throw;
         }
+    }
+
+    private void HandleCategoryChange()
+    {
+        Dictionary<string, object?> queryParameters = new Dictionary<string, object?>()
+        {
+            { nameof(CategoryId), CategoryId },
+            { nameof(SearchTerm), null }
+        };
+
+        string url = Nav.GetUriWithQueryParameters(queryParameters);
+
+        Nav.NavigateTo(url);
+    }
+
+    private void HandleSearch()
+    {
+        Dictionary<string, object?> queryParameters = new Dictionary<string, object?>()
+        {
+            { nameof(CategoryId), null },
+            { nameof(SearchTerm), searchInput }
+        };
+
+        string url = Nav.GetUriWithQueryParameters(queryParameters);
+
+        Nav.NavigateTo(url);
     }
 
     #endregion

@@ -75,7 +75,7 @@
 
                         @foreach (CategoryDTO category in Contact.Categories)
                         {
-                            <a href="" class="text-decoration-none badge rounded-pill border border-1 text-dark fw-normal">
+                            <a href="contacts?CategoryId=@category.Id" class="text-decoration-none badge rounded-pill border border-1 text-dark fw-normal">
                                 @category.Name
                             </a>
                         }
