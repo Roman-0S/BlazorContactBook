@@ -25,6 +25,16 @@
     border-radius: 50%;
 }
 
+.separator {
+    display: inline-block;
+    width: 40%;
+}
+
+.card-header {
+    background-color: var(--rs-theme-100);
+}
+
+
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     height: 100%
