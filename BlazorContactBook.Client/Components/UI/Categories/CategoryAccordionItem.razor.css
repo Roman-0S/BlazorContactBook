@@ -1,7 +1,7 @@
-﻿.a {
-    color: red;
+﻿.accordionAnchor {
+    color: var(--rs-theme-700);
 }
 
-.a:hover {
-    color: red;
-}
+    .accordionAnchor:hover {
+        color: var(--rs-theme-600);
+    }
