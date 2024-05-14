@@ -13,5 +13,7 @@ namespace BlazorContactBook.Client.Services.Interfaces
         Task UpdateCategoryAsync(CategoryDTO category, string userId);
 
         Task<CategoryDTO?> GetCategoryByIdAsync(int categoryId, string userId);
+
+        Task<bool> EmailCategoryAsync(int categoryId, EmailData emailData, string userId);
     }
 }

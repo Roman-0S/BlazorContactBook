@@ -69,6 +69,11 @@
 
         </div>
 
+        @if (!string.IsNullOrEmpty(toastMessage))
+        {
+            <ToastMessage @key="messageId" Message="@toastMessage" Color="@messageColor" />
+        }
+
     </div>
 
     <div class="col-12 col-lg-8">
@@ -117,18 +122,24 @@
     [SupplyParameterFromQuery] // ?searchTerm=
     public string? SearchTerm { get; set; }
 
+    [SupplyParameterFromQuery] // ?message=
+    public string? Message { get; set; }
+
     #endregion
 
 
     #region state
 
-    private IEnumerable<ContactDTO> contacts = [];
-
     private UserInfo? userInfo;
 
+    private IEnumerable<ContactDTO> contacts = [];
     private IEnumerable<CategoryDTO> categories = [];
 
     private string? searchInput;
+
+    private string? toastMessage;
+    private string? messageColor;
+    private Guid messageId = Guid.NewGuid();
 
     #endregion
 
@@ -157,6 +168,11 @@
 
     protected override async Task OnParametersSetAsync()
     {
+        if (!string.IsNullOrEmpty(Message))
+        {
+            ShowToastMessage(Message);
+        }
+
         if (!string.IsNullOrWhiteSpace(SearchTerm))
         {
             searchInput = SearchTerm;
@@ -215,6 +231,22 @@
         string url = Nav.GetUriWithQueryParameters(queryParameters);
 
         Nav.NavigateTo(url);
+    }
+
+    private void ShowToastMessage(string message)
+    {
+        toastMessage = message;
+
+        if (message.ToLower().Contains("wrong") || message.ToLower().Contains("error"))
+        {
+            messageColor = "danger";
+        }
+        else
+        {
+            messageColor = "success";
+        }
+
+        messageId = Guid.NewGuid();
     }
 
     #endregion

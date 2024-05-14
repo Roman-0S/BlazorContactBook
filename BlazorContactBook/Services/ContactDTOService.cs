@@ -5,10 +5,11 @@ using BlazorContactBook.Models;
 using BlazorContactBook.Services.Interfaces;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace BlazorContactBook.Services
 {
-    public class ContactDTOService(IContactRepository repository) : IContactDTOService
+    public class ContactDTOService(IContactRepository repository, IEmailSender emailSender) : IContactDTOService
     {
         public async Task<ContactDTO> CreateContactAsync(ContactDTO contactDTO, string userId)
         {
@@ -45,6 +46,25 @@ namespace BlazorContactBook.Services
         public async Task DeleteContactAsync(int contactId, string userId)
         {
             await repository.DeleteContactAsync(contactId, userId);
+        }
+
+        public async Task<bool> EmailContactAsync(int contactId, EmailData emailData, string userId)
+        {
+            try
+            {
+                Contact? contact = await repository.GetContactByIdAsync(contactId, userId);
+
+                if (contact is null) return false;
+
+                await emailSender.SendEmailAsync(contact.Email!, emailData.Subject!, emailData.Message!);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return false;
+            }
         }
 
         public async Task<ContactDTO?> GetContactByIdAsync(int contactId, string userId)

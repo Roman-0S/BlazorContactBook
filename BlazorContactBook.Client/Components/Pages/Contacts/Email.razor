@@ -1,0 +1,109 @@
+﻿@page "/contacts/email/{contactId:int}"
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+@using BlazorContactBook.Client.Helpers
+
+@inject IContactDTOService ContactService
+@inject NavigationManager Nav
+
+<PageTitle>ContactBook | Email Contact</PageTitle>
+
+
+<div class="card shadow-lg my-3">
+
+    <div class="card-body">
+
+        @if (contact is not null)
+        {
+
+            <EmailForm EmailData="emailData" OnSubmit="HandleSubmit" />
+
+        }
+
+
+    </div>
+
+</div>
+
+
+
+@code {
+
+    #region parameters
+
+    [Parameter]
+    public int ContactId { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    #endregion
+
+
+    #region state
+
+    private EmailData? emailData;
+
+    private UserInfo? userInfo;
+
+    private ContactDTO? contact;
+
+    #endregion
+
+
+    #region methods
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            userInfo = await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
+
+            contact = await ContactService.GetContactByIdAsync(ContactId, userInfo!.UserId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
+        if (contact is not null)
+        {
+            emailData = new EmailData()
+            {
+                Recipients = contact.Email,
+
+                Subject = $"Message for {contact.FullName}"
+            };
+        }
+        else
+        {
+            Nav.NavigateTo("contacts");
+        }
+    }
+
+    private async Task HandleSubmit(EmailData formEmailData)
+    {
+        string message = $"Something went wrong emailing {contact?.FullName}. Please try again later.";
+
+
+        try
+        {
+            bool success = await ContactService.EmailContactAsync(ContactId, formEmailData, userInfo!.UserId);
+
+            if (success)
+            {
+                message = $"Email successfully sent to {contact?.FullName}";
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
+        Nav.NavigateTo($"contacts?message={message}");
+    }
+
+    #endregion
+
+}

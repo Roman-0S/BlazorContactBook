@@ -1,0 +1,115 @@
+﻿@page "/categories/email/{categoryId:int}"
+
+@rendermode InteractiveServer
+
+@attribute [Authorize]
+
+@using BlazorContactBook.Client.Helpers
+
+@inject ICategoryDTOService CategoryService
+@inject NavigationManager Nav
+
+<PageTitle>ContactBook | Email Category</PageTitle>
+
+
+<div class="card shadow-lg my-3">
+
+    <div class="card-body">
+
+        @if (category is not null)
+        {
+
+            <EmailForm EmailData="emailData" OnSubmit="HandleSubmit" />
+
+        }
+
+
+    </div>
+
+</div>
+
+@code {
+
+    #region parameters
+
+    [Parameter]
+    public int CategoryId { get; set; }
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthStateTask { get; set; }
+
+    #endregion
+
+
+    #region state
+
+    private EmailData? emailData;
+
+    private UserInfo? userInfo;
+
+    private CategoryDTO? category;
+
+    #endregion
+
+
+    #region methods
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+
+            userInfo = await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
+
+            category = await CategoryService.GetCategoryByIdAsync(CategoryId, userInfo!.UserId);
+
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
+
+        if (category is not null)
+        {
+
+            emailData = new EmailData()
+                {
+                    Recipients = string.Join("; ", category.Contacts.Select(c => c.Email!)),
+
+                    Subject = $"Group Message for {category.Name}"
+                };
+
+        }
+        else
+        {
+            Nav.NavigateTo("categories");
+        }
+    }
+
+    private async Task HandleSubmit(EmailData formEmailData)
+    {
+
+        string message = $"Something went wrong emailing the {category?.Name} category. Please try again later.";
+
+        try
+        {
+            bool success = await CategoryService.EmailCategoryAsync(CategoryId, formEmailData, userInfo!.UserId);
+
+            if (success)
+            {
+                message = $"Email successfully sent to your {category?.Name} category!";
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
+        Nav.NavigateTo($"contacts?message={message}");
+    }
+
+    #endregion
+
+}
