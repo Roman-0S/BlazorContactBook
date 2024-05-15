@@ -9,6 +9,7 @@
 @inject ILogger<Login> Logger
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
+@inject IConfiguration Config
 
 <PageTitle>Log in</PageTitle>
 
@@ -56,55 +57,58 @@
                             <button type="submit" class="w-100 btn btn-lg btn-primary">Log in</button>
                         </div>
 
-                        <div class="d-flex align-items-center justify-content-center">
-
-                            <hr class="separator me-3" /> or <hr class="separator ms-3" />
-
-                        </div>
-
-
-                        <div class="my-2">
-
-                            <a href="#" class="btn btn-outline-primary">Log in as a demo user</a>
-
-                        </div>
-
-                        <hr />
-
-                        <div class="row">
-
-                            <div class="col-12 col-md-6">
-
-                                <div class="dropdown mb-2">
-
-                                    <button class="btn btn-light dropdown-toggle w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                        Trouble signing in?
-                                    </button>
-
-                                    <ul class="dropdown-menu">
-
-                                        <li><a class="dropdown-item" href="Account/ForgotPassword">Forgot password</a></li>
-
-                                        <li><a class="dropdown-item" href="Account/ResendEmailConfirmation">Resend email confirmation</a></li>
-
-                                    </ul>
-
-                                </div>
-
-                            </div>
-
-                            <div class="col-12 col-md-6">
-
-                                <a class="btn btn-light w-100" href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">
-                                    Register
-                                </a>
-
-                            </div>
-
-                        </div>
-
-
                     </EditForm>
+
+                    <div class="d-flex align-items-center justify-content-center">
+
+                        <hr class="separator me-3" /> or <hr class="separator ms-3" />
+
+                    </div>
+
+                    <form class="text-center" method="post" @formname="demoLogin" @onsubmit="LoginDemoUser">
+                        <AntiforgeryToken />
+
+                        <button class="btn btn-outline-primary">Log in as a demo user</button>
+
+                    </form>
+
+                    <hr />
+
+                    <div class="row">
+
+                        <div class="col-12 col-md-6">
+
+                            <div class="dropdown mb-2">
+
+                                <button class="btn btn-light dropdown-toggle w-100" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Trouble signing in?
+                                </button>
+
+                                <ul class="dropdown-menu">
+
+                                    <li><a class="dropdown-item" href="Account/ForgotPassword">Forgot password</a></li>
+
+                                    <li><a class="dropdown-item" href="Account/ResendEmailConfirmation">Resend email confirmation</a></li>
+
+                                </ul>
+
+                            </div>
+
+                        </div>
+
+                        <div class="col-12 col-md-6">
+
+                            <a class="btn btn-light w-100" href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">
+                                Register
+                            </a>
+
+                        </div>
+
+                    </div>
+
+
+
+
                 </div>
 
             </div>
@@ -132,6 +136,8 @@
 
     protected override async Task OnInitializedAsync()
     {
+        Input ??= new();
+
         if (HttpMethods.IsGet(HttpContext.Request.Method))
         {
             // Clear the existing external cookie to ensure a clean login process
@@ -164,6 +170,24 @@
         {
             errorMessage = "Error: Invalid login attempt.";
         }
+    }
+
+    public async Task LoginDemoUser()
+    {
+        string? demoEmail = Config["DemoUserLogin"];
+
+        if (!string.IsNullOrEmpty(demoEmail))
+        {
+            ApplicationUser? demoUser = await SignInManager.UserManager.FindByEmailAsync(demoEmail);
+
+            if (demoUser is not null)
+            {
+                await SignInManager.SignInAsync(demoUser, false);
+                RedirectManager.RedirectTo(ReturnUrl);
+            }
+        }
+
+        errorMessage = "Error: Demo user login is not available.";
     }
 
     private sealed class InputModel
