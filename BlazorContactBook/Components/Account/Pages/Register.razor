@@ -17,6 +17,7 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 @inject ApplicationDbContext DBContext
+@inject IConfiguration Config
 
 <PageTitle>Register</PageTitle>
 
@@ -90,12 +91,13 @@
                     <hr class="separator me-3" /> or <hr class="separator ms-3" />
 
                 </div>
-                
-                <div class="mt-2 mb-3">
 
-                    <a href="#" class="btn btn-outline-primary">Log in as a demo user</a>
+                <form class="text-center mt-2 mb-3" method="post" @formname="demoLogin" @onsubmit="LoginDemoUser">
+                    <AntiforgeryToken />
 
-                </div>
+                    <button class="btn btn-outline-primary">Log in as a demo user</button>
+
+                </form>
 
             </div>
 
@@ -110,6 +112,8 @@
 
 
 @code {
+    private string? errorMessage;
+
     private IEnumerable<IdentityError>? identityErrors;
 
     [SupplyParameterFromForm]
@@ -119,6 +123,11 @@
     private string? ReturnUrl { get; set; }
 
     private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
+
+    protected override void OnInitialized()
+    {
+        Input ??= new();
+    }
 
     public async Task RegisterUser(EditContext editContext)
     {
@@ -183,6 +192,24 @@
 
         await SignInManager.SignInAsync(user, isPersistent: false);
         RedirectManager.RedirectTo(ReturnUrl);
+    }
+
+    public async Task LoginDemoUser()
+    {
+        string? demoEmail = Config["DemoUserLogin"];
+
+        if (!string.IsNullOrEmpty(demoEmail))
+        {
+            ApplicationUser? demoUser = await SignInManager.UserManager.FindByEmailAsync(demoEmail);
+
+            if (demoUser is not null)
+            {
+                await SignInManager.SignInAsync(demoUser, false);
+                RedirectManager.RedirectTo(ReturnUrl);
+            }
+        }
+
+        errorMessage = "Error: Demo user login is not available.";
     }
 
     private ApplicationUser CreateUser()
