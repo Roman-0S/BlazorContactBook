@@ -53,7 +53,7 @@ namespace BlazorContactBook.Client.Services
 
         public async Task<IEnumerable<ContactDTO>> GetContactsByCategoryIdAsync(int categoryId, string userId)
         {
-            IEnumerable<ContactDTO>? contacts = await _httpClient.GetFromJsonAsync<IEnumerable<ContactDTO>>($"api/Contacts/categoryId={categoryId}");
+            IEnumerable<ContactDTO>? contacts = await _httpClient.GetFromJsonAsync<IEnumerable<ContactDTO>>($"api/Contacts?categoryId={categoryId}");
 
             return contacts!;
         }

@@ -23,30 +23,23 @@ namespace BlazorContactBook.Controllers
 
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ContactDTO>>> GetContacts()
+        public async Task<ActionResult<IEnumerable<ContactDTO>>> GetContacts([FromQuery] int? categoryId)
         {
             try
             {
-                IEnumerable<ContactDTO> contacts = await _contactDTOService.GetContactsAsync(_userId);
+                if (categoryId is null)
+                {
+                    IEnumerable<ContactDTO> contacts = await _contactDTOService.GetContactsAsync(_userId);
 
-                return Ok(contacts);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                return Problem();
-            }
-        }
+                    return Ok(contacts);
+                }
+                else
+                {
+                    IEnumerable<ContactDTO> contacts = await _contactDTOService.GetContactsByCategoryIdAsync(categoryId.Value, _userId);
 
+                    return Ok(contacts);
+                }
 
-        [HttpGet("categoryId={categoryId:int}")]
-        public async Task<ActionResult<IEnumerable<ContactDTO>>> GetContactsByCategoryId([FromRoute] int categoryId)
-        {
-            try
-            {
-                IEnumerable<ContactDTO> contacts = await _contactDTOService.GetContactsByCategoryIdAsync(categoryId, _userId);
-
-                return Ok(contacts);
             }
             catch (Exception ex)
             {
