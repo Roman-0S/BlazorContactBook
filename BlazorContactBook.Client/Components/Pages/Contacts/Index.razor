@@ -4,7 +4,7 @@
 
 @attribute [Authorize]
 
-@rendermode InteractiveServer
+@rendermode InteractiveWebAssembly
 
 @inject IContactDTOService ContactService
 @inject ICategoryDTOService CategoryService
@@ -18,7 +18,7 @@
     {
         <h1>Search results for "@SearchTerm"</h1>   
     }
-    else if (CategoryId is null)
+    else if (CategoryId is not null)
     {
         <h1>@(categories.FirstOrDefault(c => c.Id == CategoryId)?.Name ?? "Unknown")</h1>
     }
@@ -212,7 +212,8 @@
         Dictionary<string, object?> queryParameters = new Dictionary<string, object?>()
         {
             { nameof(CategoryId), CategoryId },
-            { nameof(SearchTerm), null }
+            { nameof(SearchTerm), null },
+            { nameof(Message), null },
         };
 
         string url = Nav.GetUriWithQueryParameters(queryParameters);
@@ -225,7 +226,8 @@
         Dictionary<string, object?> queryParameters = new Dictionary<string, object?>()
         {
             { nameof(CategoryId), null },
-            { nameof(SearchTerm), searchInput }
+            { nameof(SearchTerm), searchInput },
+            { nameof(Message), null },
         };
 
         string url = Nav.GetUriWithQueryParameters(queryParameters);
