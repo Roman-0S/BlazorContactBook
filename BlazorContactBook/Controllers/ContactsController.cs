@@ -56,7 +56,6 @@ namespace BlazorContactBook.Controllers
         }
 
 
-        // GET: "api/contacts/5" -> a contact or 404
         [HttpGet("{id:int}")]
         public async Task<ActionResult<ContactDTO?>> GetContactById([FromRoute] int Id)
         {
@@ -73,9 +72,9 @@ namespace BlazorContactBook.Controllers
             }
         }
 
-        // GET: "api/contacts/search?query=whatever" -> contacts matching the search query
-        [HttpGet("searchTerm={searchTerm:string}")]
-        public async Task<ActionResult<IEnumerable<ContactDTO>>> SearchContacts([FromRoute] string searchTerm)
+
+        [HttpGet("Search")]
+        public async Task<ActionResult<IEnumerable<ContactDTO>>> SearchContacts([FromQuery] string searchTerm)
         {
             try
             {
@@ -90,60 +89,78 @@ namespace BlazorContactBook.Controllers
             }
         }
 
-        // POST: "api/contacts" -> creates and returns the created contact
-        //public async Task<ActionResult<>> CreateContact()
-        //{
-        //    try
-        //    {
 
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine(ex);
-        //        return Problem();
-        //    }
-        //}
+        [HttpPost]
+        public async Task<ActionResult<ContactDTO>> CreateContact(ContactDTO contact)
+        {
+            try
+            {
+                ContactDTO createdContact = await _contactDTOService.CreateContactAsync(contact, _userId);
 
-        //// PUT: "api/contacts/5" -> updates the selected contact and returns Ok
-        //public async Task<ActionResult> UpdateContact()
-        //{
-        //    try
-        //    {
+                return Ok(createdContact);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return Problem();
+            }
+        }
 
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine(ex);
-        //        return Problem();
-        //    }
-        //}
 
-        //// DELETE: "api/contacts/5" -> deletes the selected contact and returns NoContent
-        //public async Task<ActionResult> DeleteContact()
-        //{
-        //    try
-        //    {
+        [HttpPut("{id:int}")]
+        public async Task<ActionResult> UpdateContact([FromRoute] int Id, [FromBody] ContactDTO contact)
+        {
+            try
+            {
+                if (Id != contact.Id)
+                {
+                    return BadRequest();
+                }
 
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine(ex);
-        //        return Problem();
-        //    }
-        //}
+                await _contactDTOService.UpdateContactAsync(contact, _userId);
 
-        //// POST: "api/contacts/5/email" -> sends an email to contact and returns Ok or BadRequest to indicate success or failure
-        //public async Task<ActionResult> EmailContact()
-        //{
-        //    try
-        //    {
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return Problem();
+            }
+        }
 
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine(ex);
-        //        return Problem();
-        //    }
-        //}
+
+
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> DeleteContact([FromRoute] int Id)
+        {
+            try
+            {
+                await _contactDTOService.DeleteContactAsync(Id, _userId);
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return Problem();
+            }
+        }
+
+
+        [HttpPost("{id:int}")]
+        public async Task<ActionResult<bool>> EmailContact([FromRoute] int Id, [FromBody] EmailData emailData)
+        {
+            try
+            {
+                bool success = await _contactDTOService.EmailContactAsync(Id, emailData, _userId);
+
+                return success;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return Problem();
+            }
+        }
     }
 }

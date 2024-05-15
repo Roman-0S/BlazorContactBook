@@ -13,19 +13,28 @@ namespace BlazorContactBook.Client.Services
             _httpClient = httpClient;
         }
 
-        public Task<ContactDTO> CreateContactAsync(ContactDTO contact, string userId)
+        public async Task<ContactDTO> CreateContactAsync(ContactDTO contact, string userId)
         {
-            throw new NotImplementedException();
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync("api/Contacts", contact);
+            response.EnsureSuccessStatusCode();
+
+            ContactDTO? createdContact = await response.Content.ReadFromJsonAsync<ContactDTO>();
+            return createdContact!;
         }
 
-        public Task DeleteContactAsync(int contactId, string userId)
+        public async Task DeleteContactAsync(int contactId, string userId)
         {
-            throw new NotImplementedException();
+            HttpResponseMessage response = await _httpClient.DeleteAsync($"api/contacts/{contactId}");
+            response.EnsureSuccessStatusCode();
         }
 
-        public Task<bool> EmailContactAsync(int contactId, EmailData emailData, string userId)
+        public async Task<bool> EmailContactAsync(int contactId, EmailData emailData, string userId)
         {
-            throw new NotImplementedException();
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync($"api/Contacts/{contactId}", emailData);
+            response.EnsureSuccessStatusCode();
+
+            bool success = await response.Content.ReadFromJsonAsync<bool>();
+            return success;
         }
 
         public async Task<ContactDTO?> GetContactByIdAsync(int contactId, string userId)
@@ -51,14 +60,15 @@ namespace BlazorContactBook.Client.Services
 
         public async Task<IEnumerable<ContactDTO>> SearchContactsAsync(string searchTerm, string userId)
         {
-            IEnumerable<ContactDTO>? contacts = await _httpClient.GetFromJsonAsync<IEnumerable<ContactDTO>>($"api/Contacts/searchTerm={searchTerm}");
+            IEnumerable<ContactDTO> contacts = await _httpClient.GetFromJsonAsync<IEnumerable<ContactDTO>>($"api/Contacts/Search?SearchTerm={searchTerm}") ?? [];
 
-            return contacts!;
+            return contacts;
         }
 
-        public Task UpdateContactAsync(ContactDTO contact, string userId)
+        public async Task UpdateContactAsync(ContactDTO contact, string userId)
         {
-            throw new NotImplementedException();
+            HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"api/Contacts/{contact.Id}", contact);
+            response.EnsureSuccessStatusCode();
         }
     }
 }
