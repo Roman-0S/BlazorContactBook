@@ -140,7 +140,7 @@ namespace BlazorContactBook.Controllers
         }
 
 
-        [HttpPost("{id:int}")]
+        [HttpPost("{id:int}/email")]
         public async Task<ActionResult<bool>> EmailContact([FromRoute] int Id, [FromBody] EmailData emailData)
         {
             try

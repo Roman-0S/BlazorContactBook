@@ -30,7 +30,7 @@ namespace BlazorContactBook.Client.Services
 
         public async Task<bool> EmailContactAsync(int contactId, EmailData emailData, string userId)
         {
-            HttpResponseMessage response = await _httpClient.PostAsJsonAsync($"api/Contacts/{contactId}", emailData);
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync($"api/Contacts/{contactId}/email", emailData);
             response.EnsureSuccessStatusCode();
 
             bool success = await response.Content.ReadFromJsonAsync<bool>();
