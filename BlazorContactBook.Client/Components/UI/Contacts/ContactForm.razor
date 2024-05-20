@@ -288,6 +288,8 @@
             try
             {
                 Contact!.ImageURL = await ImageHelper.GetDataUrl(changeEvent.File);
+
+                imageError = null;
             }
             catch (Exception ex)
             {
