@@ -12,7 +12,9 @@ namespace BlazorContactBook.Controllers
     [Authorize]
     public class CategoriesController : ControllerBase
     {
+        // making a private field which whenever is called runs the method User.GetUserId;
         private string _userId => User.GetUserId()!;
+        // in this case => is a computed property (or expression bodied member)
 
         private readonly ICategoryDTOService _categoryDTOService;
 
