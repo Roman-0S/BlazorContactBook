@@ -150,6 +150,8 @@
     {
         userInfo = await UserInfoHelper.GetUserInfoAsync(AuthStateTask);
 
+        if (userInfo is null) Nav.NavigateTo("Account/Login");
+
         categories = await CategoryService.GetCategoriesAsync(userInfo!.UserId);
 
         if (CategoryId is not null or 0)
